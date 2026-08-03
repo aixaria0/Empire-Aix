@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="description" content="Empire CSS Grid + PWA demo" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-and-transparent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>Empire Grid + PWA</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --border: #2a2a2a;
+      --fg: #e8e8e8;
+      --muted: #9a9a9a;
+      --accent: #3b82f6;
+      --gap: 12px;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 4px; }
+    h2 { font-size: 1.05rem; margin: 0 0 10px; color: #fff; }
+    p { margin: 0 0 12px; color: var(--muted); line-height: 1.45; }
+    code {
+      font-size: 0.85em;
+      background: #1c1c1c;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .app {
+      display: grid;
+      gap: 20px;
+      max-width: 960px;
+      margin: 0 auto;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "header"
+        "status"
+        "demos"
+        "pwa"
+        "footer";
+    }
+    @media (min-width: 720px) {
+      .app {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "header header"
+          "status status"
+          "demos pwa"
+          "footer footer";
+      }
+    }
+    .header { grid-area: header; }
+    .status { grid-area: status; }
+    .demos { grid-area: demos; }
+    .pwa { grid-area: pwa; }
+    .footer { grid-area: footer; color: var(--muted); font-size: 0.85rem; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .grid-playground {
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: minmax(56px, auto);
+    }
+    .cell {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      min-height: 56px;
+    }
+    .cell.span-2 { grid-column: span 2; background: #172554; border-color: #1e3a8a; }
+    .cell.span-row { grid-row: span 2; background: #14532d; border-color: #166534; }
+    .cell.featured {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #1e3a8a, #312e81);
+      border-color: #3730a3;
+      min-height: 72px;
+    }
+    .page-grid {
+      display: grid;
+      gap: 8px;
+      min-height: 160px;
+      grid-template-columns: 1fr 2fr;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas:
+        "nav nav"
+        "side main"
+        "foot foot";
+    }
+    .page-grid > * {
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .g-nav { grid-area: nav; background: #1e293b; }
+    .g-side { grid-area: side; background: #334155; }
+    .g-main { grid-area: main; background: #0f766e; }
+    .g-foot { grid-area: foot; background: #3f3f46; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #111;
+      color: #fff;
+      padding: 10px 14px;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .pill.on { background: #14532d; border-color: #166534; }
+    .pill.off { background: #450a0a; border-color: #7f1d1d; }
+    ul.tips { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.9rem; }
+    ul.tips li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>CSS Grid + PWA</h1>
+      <p>Layout playground and installable web app for tablet.</p>
+    </header>
+
+    <section class="status card">
+      <h2>PWA status</h2>
+      <p>
+        <span class="pill" id="swPill">SW: …</span>
+        <span class="pill" id="onlinePill">Network: …</span>
+        <span class="pill" id="displayPill">Display: …</span>
+      </p>
+      <div class="controls">
+        <button type="button" class="primary" id="installBtn" disabled>Install app</button>
+        <button type="button" id="notifyBtn">Test notification</button>
+      </div>
+      <p id="pwaMsg" style="margin:0;color:var(--muted);font-size:0.9rem;"></p>
+    </section>
+
+    <section class="demos card">
+      <h2>1. CSS Grid — spans &amp; flow</h2>
+      <p>Uses <code>repeat(3, 1fr)</code>, <code>span</code>, and full-width cells.</p>
+      <div class="controls">
+        <button type="button" id="gapBtn">Toggle gap</button>
+        <button type="button" id="colsBtn">2 / 3 columns</button>
+      </div>
+      <div class="grid-playground" id="playground">
+        <div class="cell featured">header · grid-column: 1 / -1</div>
+        <div class="cell span-row">A · row span 2</div>
+        <div class="cell">B</div>
+        <div class="cell">C</div>
+        <div class="cell span-2">D · column span 2</div>
+        <div class="cell">E</div>
+        <div class="cell">F</div>
+        <div class="cell">G</div>
+      </div>
+    </section>
+
+    <section class="pwa card">
+      <h2>2. Named grid areas</h2>
+      <p><code>grid-template-areas</code> page layout.</p>
+      <div class="page-grid">
+        <div class="g-nav">nav</div>
+        <div class="g-side">side</div>
+        <div class="g-main">main</div>
+        <div class="g-foot">foot</div>
+      </div>
+      <ul class="tips">
+        <li><code>fr</code> shares free space</li>
+        <li><code>minmax(56px, auto)</code> keeps rows touch-friendly</li>
+        <li>App shell switches 1→2 columns at 720px</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      Empire PWA · offline after first load when Service Worker is active
+    </footer>
+  </div>
+
+  <script>
+    const playground = document.getElementById("playground");
+    let threeCols = true;
+    document.getElementById("gapBtn").onclick = () => {
+      playground.style.gap = getComputedStyle(playground).gap === "0px" ? "12px" : "0px";
+    };
+    document.getElementById("colsBtn").onclick = () => {
+      threeCols = !threeCols;
+      playground.style.gridTemplateColumns = threeCols ? "repeat(3, 1fr)" : "repeat(2, 1fr)";
+    };
+
+    const swPill = document.getElementById("swPill");
+    const onlinePill = document.getElementById("onlinePill");
+    const displayPill = document.getElementById("displayPill");
+    const pwaMsg = document.getElementById("pwaMsg");
+    const installBtn = document.getElementById("installBtn");
+    let deferredPrompt = null;
+
+    function setOnline() {
+      const on = navigator.onLine;
+      onlinePill.textContent = on ? "Network: online" : "Network: offline";
+      onlinePill.className = "pill " + (on ? "on" : "off");
+    }
+    setOnline();
+    window.addEventListener("online", setOnline);
+    window.addEventListener("offline", setOnline);
+
+    const standalone = window.matchMedia("(display-mode: standalone)").matches
+      || window.navigator.standalone === true;
+    displayPill.textContent = standalone ? "Display: standalone" : "Display: browser";
+    displayPill.className = "pill " + (standalone ? "on" : "off");
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js")
+        .then(() => {
+          swPill.textContent = "SW: registered";
+          swPill.className = "pill on";
+          pwaMsg.textContent = "Service Worker ready. Reload once, then try offline.";
+        })
+        .catch((err) => {
+          swPill.textContent = "SW: failed";
+          swPill.className = "pill off";
+          pwaMsg.textContent = "SW failed: " + err.message;
+        });
+    } else {
+      swPill.textContent = "SW: unsupported";
+      swPill.className = "pill off";
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.disabled = false;
+      pwaMsg.textContent = "Install available — tap Install app.";
+    });
+
+    installBtn.onclick = async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      pwaMsg.textContent = "Install: " + choice.outcome;
+      deferredPrompt = null;
+      installBtn.disabled = true;
+    };
+
+    document.getElementById("notifyBtn").onclick = async () => {
+      if (!("Notification" in window)) {
+        pwaMsg.textContent = "Notifications not supported.";
+        return;
+      }
+      let perm = Notification.permission;
+      if (perm === "default") perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        new Notification("Empire PWA", {
+          body: "Notification works on this device.",
+          icon: "./icon.svg"
+        });
+        pwaMsg.textContent = "Notification sent.";
+      } else {
+        pwaMsg.textContent = "Notification permission: " + perm;
+      }
+    };
+  </script>
+</body>
+</html>
